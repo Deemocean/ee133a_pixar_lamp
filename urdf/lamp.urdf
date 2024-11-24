@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<robot name="lamp">
+
+  <!-- *************************************************** -->
+  <!-- ******************** Kinematics ******************* -->
+  <!-- *************************************************** -->
+
+  <!-- Base Link -->
+  <link name="base">
+    <visual>
+      <geometry>
+        <mesh filename="package://pixar/meshes/Base.stl" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Joint between world and link0 -->
+  <joint name="theta1" type="continuous">
+    <parent link="base"/>
+    <child  link="link0"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis   xyz="0 0 1"/>
+  </joint>
+
+  <!-- Link 0 -->
+  <link name="link0">
+    <visual>
+      <geometry>
+        <mesh filename="package://pixar/meshes/link0.stl" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Joint between link0 and link1 -->
+  <joint name="theta2" type="continuous">
+    <parent link="link0"/>
+    <child  link="link1"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis   xyz="0 1 0"/>
+  </joint>
+
+  <!-- Link 1 -->
+  <link name="link1">
+    <visual>
+      <geometry>
+        <mesh filename="package://pixar/meshes/link1.stl" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Joint between link1 and link2 -->
+  <joint name="theta3" type="continuous">
+    <parent link="link1"/>
+    <child  link="link2"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis   xyz="0 1 0"/>
+  </joint>
+
+  <!-- Link 2 -->
+  <link name="link2">
+    <visual>
+      <geometry>
+        <mesh filename="package://pixar/meshes/link2.stl"  scale="0.01 0.01 0.01"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Joint between link2 and head -->
+  <joint name="theta4" type="continuous">
+    <parent link="link2"/>
+    <child  link="head"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis   xyz="0 1 0"/>
+  </joint>
+
+  <!-- Head Link -->
+  <link name="head">
+    <visual>
+      <geometry>
+        <mesh filename="package://pixar/meshes/Head.stl"  scale="0.01 0.01 0.01"/>
+      </geometry>
+    </visual>
+  </link>
+
+</robot>
