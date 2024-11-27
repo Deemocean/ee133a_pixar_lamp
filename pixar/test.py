@@ -6,9 +6,9 @@ import numpy as np
 from math import pi, sin, cos, acos, atan2, sqrt, fmod, exp
 
 # Grab the utilities
-from GeneratorNode      import GeneratorNode
-from TransformHelpers   import *
-from TrajectoryUtils    import *
+from pixar.GeneratorNode      import GeneratorNode
+from pixar.TransformHelpers   import *
+from pixar.TrajectoryUtils    import *
 
 #
 #   Gimbal Kinematics
@@ -55,8 +55,8 @@ class Trajectory():
     # Evaluate at the given time.  This was last called (dt) ago.
     def evaluate(self, t, dt):
         # we're just going to make the lamp rotate in a wavy circle around its head
-        xd = np.array(np.cos(t), np.sin(t), 1+np.cos(t))
-        vd = np.array(-np.sin(t), np.cos(t), -np.sin(t))
+        xd = np.array([np.cos(t), np.sin(t), 1+np.cos(t)])
+        vd = np.array([-np.sin(t), np.cos(t), -np.sin(t)])
         
         # Grab the last joint value and desired orientation.
         qdlast = self.qd
@@ -69,11 +69,11 @@ class Trajectory():
         qd = qdlast + dt * qddot
 
         # Save the joint value and desired orientation for next cycle.
-        self.qd = qd
-        self.Rd = Rd
         Rd = Reye()
         wd = pzero()
-
+        self.qd = qd
+        self.Rd = Rd
+        
         # Return the desired joint and task (orientation) pos/vel.
         return (qd, qddot, None, None, Rd, wd)
     
