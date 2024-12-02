@@ -6,7 +6,7 @@ import numpy as np
 from math import pi, sin, cos, acos, atan2, sqrt, fmod, exp
 
 # Grab the utilities
-from pixar.pixar.helpers.GeneratorNode      import GeneratorNode
+from pixar.helpers.GeneratorNode      import GeneratorNode
 from pixar.helpers.TransformHelpers   import *
 from pixar.helpers.TrajectoryUtils    import *
 

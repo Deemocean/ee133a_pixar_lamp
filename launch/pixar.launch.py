@@ -25,11 +25,15 @@ def generate_launch_description():
     rvizcfg = os.path.join(pkgdir('pixar'), 'rviz/pixar.rviz')
 
     # Locate the URDF file
-    urdf = os.path.join(pkgdir('pixar'), 'urdf/lamp.urdf')
+    lamp_urdf = os.path.join(pkgdir('pixar'), 'urdf/lamp.urdf')
+    scene_urdf = os.path.join(pkgdir('pixar'), 'urdf/scene.urdf')
 
     # Load the robot's URDF file (XML).
-    with open(urdf, 'r') as file:
-        robot_description = file.read()
+    with open(lamp_urdf, 'r') as file:
+        lamp_description = file.read()
+
+    with open(scene_urdf, 'r') as file:
+        scene_description = file.read()
 
     ######################################################################
     # PREPARE THE LAUNCH ELEMENTS
@@ -50,12 +54,19 @@ def generate_launch_description():
 
 
     # Configure a node for the robot_state_publisher.
-    node_robot_state_publisher = Node(
-        name       = 'robot_state_publisher', 
+    node_robot_state_publisher_lamp = Node(
+        name       = 'robot_state_publisher_lamp', 
         package    = 'robot_state_publisher',
         executable = 'robot_state_publisher',
         output     = 'screen',
-        parameters = [{'robot_description': robot_description}])
+        parameters = [{'robot_description': lamp_description}])
+    
+    node_robot_state_publisher_scene = Node(
+        name       = 'robot_state_publisher_scene', 
+        package    = 'robot_state_publisher',
+        executable = 'robot_state_publisher',
+        output     = 'screen',
+        parameters = [{'robot_description': scene_description}])
 
     # Configure a node for RVIZ
     node_rviz = Node(
@@ -71,7 +82,8 @@ def generate_launch_description():
     # RETURN THE ELEMENTS IN ONE LIST
     return LaunchDescription([
         # Start the robot_state_publisher, RVIZ, and the trajectory.
-        node_robot_state_publisher,
+        node_robot_state_publisher_lamp,
+        node_robot_state_publisher_scene,
         node_rviz,
         node_trajectory,
         # joint_state_publisher_gui,
