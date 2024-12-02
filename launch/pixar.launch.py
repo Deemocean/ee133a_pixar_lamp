@@ -40,6 +40,14 @@ def generate_launch_description():
             executable='joint_state_publisher_gui',
             name='joint_state_publisher_gui'
         )
+    
+
+    node_trajectory = Node(
+        name       = 'trajectory', 
+        package    = 'pixar',
+        executable = 'test',
+        output     = 'screen')
+
 
     # Configure a node for the robot_state_publisher.
     node_robot_state_publisher = Node(
@@ -65,5 +73,6 @@ def generate_launch_description():
         # Start the robot_state_publisher, RVIZ, and the trajectory.
         node_robot_state_publisher,
         node_rviz,
-        joint_state_publisher_gui,
+        node_trajectory,
+        # joint_state_publisher_gui,
     ])

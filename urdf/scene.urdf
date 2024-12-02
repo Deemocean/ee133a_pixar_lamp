@@ -1,0 +1,32 @@
+<!-- scene.urdf -->
+<?xml version="1.0"?>
+<robot name="fixed_scene">
+  
+  <!-- Ground -->
+  <link name="ground">
+    <visual>
+      <geometry>
+        <mesh filename="package://pixar/meshes/scene/scene.stl" />
+      </geometry>
+      <material name="gray">
+        <color rgba="0.5 0.5 0.5 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://pixar/meshes/scene/scene.stl" />
+      </geometry>
+    </collision>
+  </link>
+
+
+
+  <!-- Define fixed joints to position scene elements -->
+  <joint name="ground_joint" type="fixed">
+    <parent link="world"/> 
+    <child link="ground"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+
+</robot>
