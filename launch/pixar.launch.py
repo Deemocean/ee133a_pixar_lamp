@@ -24,15 +24,12 @@ def generate_launch_description():
     # Locate the RVIZ configuration file.
     rvizcfg = os.path.join(pkgdir('pixar'), 'rviz/pixar.rviz')
 
-
     # Locate the URDF file
     urdf = os.path.join(pkgdir('pixar'), 'urdf/lamp.urdf')
-    # urdf = os.path.join(pkgdir('pixar'), 'urdf/gimbal.urdf')
 
     # Load the robot's URDF file (XML).
     with open(urdf, 'r') as file:
         robot_description = file.read()
-
 
     ######################################################################
     # PREPARE THE LAUNCH ELEMENTS
