@@ -12,7 +12,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         # Recursively include all .stl and .dae mesh files
-        ('share/' + package_name + '/meshes', glob('meshes/**/*.stl', recursive=True) + glob('meshes/**/*.dae', recursive=True)),
+        ('share/' + package_name + '/meshes', '''glob('meshes/**/*.stl', recursive=True) + '''glob('meshes/**/*.dae', recursive=True)),
         ('share/' + package_name + '/rviz',   glob('rviz/*')),
         ('share/' + package_name + '/urdf',   glob('urdf/*')),
         ('share/' + package_name + '/launch', glob('launch/*')),
@@ -29,6 +29,7 @@ setup(
         'console_scripts': [
             'lamp_traj = pixar.lamp_traj_node:main',
             'broadcaster = pixar.broadcaster_node:main',
+            'momentum = pixar.momentum_test:main'
         ],
     },
 )
