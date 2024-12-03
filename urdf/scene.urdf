@@ -12,11 +12,11 @@
       </geometry>
     </visual>
 
-    <collision>
+    <!-- <collision>
       <geometry>
         <mesh filename="package://pixar/meshes/scene.dae" />
       </geometry>
-    </collision>
+    </collision> -->
 
   </link>
 

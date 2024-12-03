@@ -27,7 +27,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'test = pixar.test:main'
+            'lamp_traj = pixar.lamp_traj_node:main',
+            'broadcaster = pixar.broadcaster_node:main',
         ],
     },
 )

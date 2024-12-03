@@ -38,31 +38,42 @@ def generate_launch_description():
     ######################################################################
     # PREPARE THE LAUNCH ELEMENTS
 
+
     # Joint State Publisher GUI
     joint_state_publisher_gui  = Node(
             package='joint_state_publisher_gui',
             executable='joint_state_publisher_gui',
-            name='joint_state_publisher_gui'
+            namespace='lamp',
+            name='joint_state_publisher_gui',
+            parameters = [{'rate': 60.0}]
         )
-    
 
+    node_tf = Node(
+        name       = 'tf', 
+        package    = 'pixar',
+        executable = 'broadcaster',
+        output     = 'screen')
+    
     node_trajectory = Node(
         name       = 'trajectory', 
         package    = 'pixar',
-        executable = 'test',
+        executable = 'lamp_traj',
         output     = 'screen')
 
 
     # Configure a node for the robot_state_publisher.
     node_robot_state_publisher_lamp = Node(
-        name       = 'robot_state_publisher_lamp', 
+        name       = 'robot_state_publisher', 
+        namespace="lamp",
         package    = 'robot_state_publisher',
         executable = 'robot_state_publisher',
         output     = 'screen',
-        parameters = [{'robot_description': lamp_description}])
+        parameters = [{'robot_description': lamp_description},
+                      {'publish_frequency': 60.0}])
     
     node_robot_state_publisher_scene = Node(
-        name       = 'robot_state_publisher_scene', 
+        name       = 'robot_state_publisher', 
+        namespace="scene",
         package    = 'robot_state_publisher',
         executable = 'robot_state_publisher',
         output     = 'screen',
@@ -85,6 +96,7 @@ def generate_launch_description():
         node_robot_state_publisher_lamp,
         node_robot_state_publisher_scene,
         node_rviz,
-        node_trajectory,
-        # joint_state_publisher_gui,
+        #node_trajectory,
+        joint_state_publisher_gui,
+        node_tf,
     ])
