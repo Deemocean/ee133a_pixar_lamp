@@ -1,0 +1,32 @@
+<!-- scene.urdf -->
+<?xml version="1.0"?>
+<robot name="fixed_scene">
+
+  <link name="world"></link>
+  
+  <!-- Ground -->
+  <link name="scene">
+    <visual>
+      <geometry>
+        <mesh filename="package://pixar/meshes/scene.dae" />
+      </geometry>
+    </visual>
+
+    <!-- <collision>
+      <geometry>
+        <mesh filename="package://pixar/meshes/scene.dae" />
+      </geometry>
+    </collision> -->
+
+  </link>
+
+
+  <!-- Define fixed joints to position scene elements -->
+  <joint name="ground_joint" type="fixed">
+    <parent link="world"/> 
+    <child link="scene"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+
+</robot>

@@ -4,11 +4,9 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Global Options1
-        - /Grid1
         - /Grid1/Offset1
-        - /RobotModel1
-        - /RobotModel1/Description Topic1
+        - /RobotModel-Scene1/Description Topic1
+        - /Axes1/Status1
       Splitter Ratio: 0.5676470398902893
     Tree Height: 1106
   - Class: rviz_common/Selection
@@ -60,7 +58,42 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot_description
+        Value: /scene/robot_description
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        scene:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        world:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+      Mass Properties:
+        Inertia: false
+        Mass: false
+      Name: RobotModel-Scene
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
+    - Alpha: 1
+      Class: rviz_default_plugins/RobotModel
+      Collision Enabled: false
+      Description File: ""
+      Description Source: Topic
+      Description Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /lamp/robot_description
       Enabled: true
       Links:
         All Links Enabled: true
@@ -96,7 +129,7 @@ Visualization Manager:
       Mass Properties:
         Inertia: false
         Mass: false
-      Name: RobotModel
+      Name: RobotModel-Lamp
       TF Prefix: ""
       Update Interval: 0
       Value: true
@@ -116,16 +149,16 @@ Visualization Manager:
       Update Interval: 0
       Value: false
     - Class: rviz_default_plugins/Axes
-      Enabled: true
+      Enabled: false
       Length: 0.30000001192092896
       Name: Axes
       Radius: 0.029999999329447746
       Reference Frame: desired
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: base
+    Fixed Frame: world
     Frame Rate: 30
   Name: root
   Tools:
@@ -168,7 +201,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 42.826019287109375
+      Distance: 214.65789794921875
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -183,10 +216,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5847973227500916
+      Pitch: 0.2647976875305176
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.755411982536316
+      Yaw: 2.3204185962677
     Saved: ~
 Window Geometry:
   Displays:
@@ -204,5 +237,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 3141
-  X: 488
-  Y: 414
+  X: 520
+  Y: 330
