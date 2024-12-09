@@ -59,6 +59,12 @@ def generate_launch_description():
         package    = 'pixar',
         executable = 'lamp_traj',
         output     = 'screen')
+    
+    node_marker = Node(
+        name       = 'marker', 
+        package    = 'pixar',
+        executable = 'marker',
+        output     = 'screen')
 
 
     # Configure a node for the robot_state_publisher.
@@ -97,6 +103,7 @@ def generate_launch_description():
         node_robot_state_publisher_scene,
         node_rviz,
         node_trajectory,
+        node_marker,
         #joint_state_publisher_gui,
         node_tf,
     ])

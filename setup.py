@@ -29,6 +29,7 @@ setup(
         'console_scripts': [
             'lamp_traj = pixar.lamp_traj_node:main',
             'broadcaster = pixar.broadcaster_node:main',
+            'marker = pixar.marker_node:main',
         ],
     },
 )

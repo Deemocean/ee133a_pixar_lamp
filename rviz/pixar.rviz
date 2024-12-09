@@ -6,7 +6,6 @@ Panels:
       Expanded:
         - /Grid1/Offset1
         - /RobotModel-Scene1/Description Topic1
-        - /Axes1/Status1
       Splitter Ratio: 0.5676470398902893
     Tree Height: 1106
   - Class: rviz_common/Selection
@@ -111,6 +110,11 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        head_theta4:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         link0:
           Alpha: 1
           Show Axes: false
@@ -134,6 +138,19 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: LookTarget
+      Namespaces:
+        lamp_visualization: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /visualization_marker
+      Value: true
     - Class: rviz_default_plugins/TF
       Enabled: false
       Frame Timeout: 15
@@ -201,7 +218,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 214.65789794921875
+      Distance: 6.677704811096191
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -216,10 +233,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.2647976875305176
+      Pitch: 0.42979758977890015
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.3204185962677
+      Yaw: 3.915424108505249
     Saved: ~
 Window Geometry:
   Displays:
@@ -237,5 +254,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 3141
-  X: 520
-  Y: 330
+  X: 970
+  Y: 262
