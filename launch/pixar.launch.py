@@ -96,7 +96,7 @@ def generate_launch_description():
         node_robot_state_publisher_lamp,
         node_robot_state_publisher_scene,
         node_rviz,
-        #node_trajectory,
-        joint_state_publisher_gui,
+        node_trajectory,
+        #joint_state_publisher_gui,
         node_tf,
     ])

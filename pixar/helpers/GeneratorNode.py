@@ -66,7 +66,7 @@ from pixar.helpers.TransformHelpers  import quat_from_R
 #
 class GeneratorNode(Node):
     # Initialization.
-    def __init__(self, name, rate, Trajectory):
+    def __init__(self, name,namespace, rate, Trajectory):
         # Initialize the node, naming it as specified
         super().__init__(name)
 
@@ -75,17 +75,17 @@ class GeneratorNode(Node):
         self.jointnames = self.trajectory.jointnames()
 
         # Add a publisher to send the joint commands.
-        self.pubjoint = self.create_publisher(JointState, '/joint_states', 10)
-        self.pubpose  = self.create_publisher(PoseStamped, '/pose', 10)
-        self.pubtwist = self.create_publisher(TwistStamped, '/twist', 10)
+        self.pubjoint = self.create_publisher(JointState, namespace+'/joint_states', 10)
+        self.pubpose  = self.create_publisher(PoseStamped, namespace+'/pose', 10)
+        self.pubtwist = self.create_publisher(TwistStamped, namespace+'/twist', 10)
 
         # Initialize a regular and static transform broadcaster
         self.tfbroadcaster = tf2_ros.TransformBroadcaster(self)
 
         # Wait for a connection to happen.  This isn't necessary, but
         # means we don't start until the rest of the system is ready.
-        self.get_logger().info("Waiting for a /joint_states subscriber...")
-        while(not self.count_subscribers('/joint_states')):
+        self.get_logger().info("Waiting for a "+namespace+"/joint_states subscriber...")
+        while(not self.count_subscribers(namespace+'/joint_states')):
             pass
 
         # Create a future object to signal when the trajectory ends,
