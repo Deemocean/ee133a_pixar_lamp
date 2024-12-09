@@ -142,6 +142,8 @@ class GeneratorNode(Node):
             (q,qdot,p,v,R,w) = (des[0],des[1],des[2],des[3],None,None)
         elif len(des) == 6:
             (q,qdot,p,v,R,w) = des
+        elif len(des) == 8:
+            (q,qdot,p,v,R,w, p_base,q_base) = des
         else:
             raise ValueError("The trajectory must return 2, 4, 6 elements")
 
@@ -155,12 +157,16 @@ class GeneratorNode(Node):
         if R    is None:    quat  = [0.0, 0.0, 0.0, 1.0]
         else:               quat  = quat_from_R(R)
 
+        if p_base is None:  p_base = [0.0, 0.0, 0.0]
+        if q_base is None:  q_base = [0.0, 0.0, 0.0, 1.0]
+
         # Turn into lists.
         if type(q).__module__    == np.__name__: q    = q.flatten().tolist()
         if type(qdot).__module__ == np.__name__: qdot = qdot.flatten().tolist()
         if type(p).__module__    == np.__name__: p    = p.flatten().tolist()
         if type(v).__module__    == np.__name__: v    = v.flatten().tolist()
         if type(w).__module__    == np.__name__: w    = w.flatten().tolist()
+
 
         # Verify the sizes.
         if not (len(q) == len(self.jointnames) and
@@ -172,6 +178,12 @@ class GeneratorNode(Node):
             raise ValueError("(p) and (v) must be length 3!")
         if not (len(w) == 3):
             raise ValueError("(omega) must be length 3!")
+        
+        if not (len(p_base) == 3):
+            raise ValueError("(p_base_in_world) must be length 3!")
+        
+
+        
 
         # Determine the corresponding ROS time (seconds since 1970).
         now = self.start + rclpy.time.Duration(seconds=self.t)
@@ -220,3 +232,27 @@ class GeneratorNode(Node):
         msg.transform.rotation.z    = quat[2]
         msg.transform.rotation.w    = quat[3]
         self.tfbroadcaster.sendTransform(msg)
+
+        # Prepare the TF from Base to World
+        t = TransformStamped()
+
+        t.header.stamp = now.to_msg()
+        t.header.frame_id = 'world'
+        t.child_frame_id = 'base'
+
+        # Define the translation
+        t.transform.translation.x = p_base[0]
+        t.transform.translation.y = p_base[1]
+        t.transform.translation.z = p_base[2]
+
+        # Define the rotation
+        t.transform.rotation.x = q_base[0]
+        t.transform.rotation.y = q_base[1]
+        t.transform.rotation.z = q_base[2]
+        t.transform.rotation.w = q_base[3]
+
+        # Broadcast the transform
+        self.tfbroadcaster.sendTransform(t)
+
+
+

@@ -105,5 +105,5 @@ def generate_launch_description():
         node_trajectory,
         node_marker,
         #joint_state_publisher_gui,
-        node_tf,
+        #node_tf,
     ])

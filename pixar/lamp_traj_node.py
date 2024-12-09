@@ -74,9 +74,15 @@ class Trajectory():
         wd = pzero()
         self.qd = qd
         self.Rd = Rd
+
+        # Exmaple 
+
+        x = sin(t)
+        p_base_in_world = [x,0.0,0.0]
+        q_base_in_world = quat_from_R(Reye())
         
         # Return the desired joint and task (orientation) pos/vel.
-        return (qd, qddot, None, None, Rd, wd)
+        return (qd, qddot, None, None, Rd, wd, p_base_in_world, q_base_in_world)
 
 
 
