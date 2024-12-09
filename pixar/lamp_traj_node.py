@@ -47,8 +47,6 @@ class Trajectory():
         # Pick the convergence bandwidth.
         self.lam = 20
 
-        #
-
 
     # Declare the joint names.
     def jointnames(self):
