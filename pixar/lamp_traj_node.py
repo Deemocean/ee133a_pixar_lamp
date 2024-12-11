@@ -47,6 +47,7 @@ class Trajectory():
         # Pick the convergence bandwidth.
         self.lam = 20
 
+
     # Declare the joint names.
     def jointnames(self):
         # Return a list of joint names FOR THE EXPECTED URDF!
@@ -73,10 +74,18 @@ class Trajectory():
         wd = pzero()
         self.qd = qd
         self.Rd = Rd
+
+        # Exmaple 
+
+        x = sin(t)
+        p_base_in_world = [x,0.0,0.0]
+        q_base_in_world = quat_from_R(Reye())
         
         # Return the desired joint and task (orientation) pos/vel.
-        return (qd, qddot, None, None, Rd, wd)
-    
+        return (qd, qddot, None, None, Rd, wd, p_base_in_world, q_base_in_world)
+
+
+
 #
 #  Main Code
 #
@@ -86,11 +95,11 @@ def main(args=None):
 
     # Initialize the generator node for 100Hz udpates, using the above
     # Trajectory class.
-    generator = GeneratorNode('generator', 100, Trajectory)
-
+    generator = GeneratorNode('generator', "/lamp", 100, Trajectory)
     # Spin, meaning keep running (taking care of the timer callbacks
     # and message passing), until interrupted or the trajectory ends.
     generator.spin()
+
 
     # Shutdown the node and ROS.
     generator.shutdown()
