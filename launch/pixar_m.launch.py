@@ -46,11 +46,11 @@ def generate_launch_description():
     # PREPARE THE LAUNCH ELEMENTS
 
     # Configure a node for the robot_state_publisher.
-    node_tf = Node(
-        name       = 'tf', 
-        package    = 'pixar',
-        executable = 'broadcaster',
-        output     = 'screen')
+    # node_tf = Node(
+    #     name       = 'tf', 
+    #     package    = 'pixar',
+    #     executable = 'broadcaster',
+    #     output     = 'screen')
     
     node_trajectory = Node(
         name       = 'trajectory', 

@@ -137,15 +137,15 @@ class GeneratorNode(Node):
 
         # Extract the appropriate information.
         if   len(des) == 2:
-            (q,qdot,p,v,R,w) = (des[0],des[1],None,None,None,None)
+            (q,qdot,p,v,R,w,p_base,q_base) = (des[0],des[1],None,None,None,None,None,None)
         elif len(des) == 4:
-            (q,qdot,p,v,R,w) = (des[0],des[1],des[2],des[3],None,None)
+            (q,qdot,p,v,R,w,p_base,q_base) = (des[0],des[1],des[2],des[3],None,None,None,None)
         elif len(des) == 6:
-            (q,qdot,p,v,R,w) = des
+            (q,qdot,p,v,R,w,p_base,q_base) = (des[0],des[1],des[2],des[3],des[4],des[5],None,None)
         elif len(des) == 8:
             (q,qdot,p,v,R,w, p_base,q_base) = des
         else:
-            raise ValueError("The trajectory must return 2, 4, 6 elements")
+            raise ValueError("The trajectory must return 2, 4, 6, 8 elements")
 
         # Check the joint results.
         if q    is None:    q    = [nan] * len(self.jointnames)
