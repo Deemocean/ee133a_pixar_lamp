@@ -38,21 +38,7 @@ def generate_launch_description():
     ######################################################################
     # PREPARE THE LAUNCH ELEMENTS
 
-
     # Joint State Publisher GUI
-    joint_state_publisher_gui  = Node(
-            package='joint_state_publisher_gui',
-            executable='joint_state_publisher_gui',
-            namespace='lamp',
-            name='joint_state_publisher_gui',
-            parameters = [{'rate': 60.0}]
-        )
-
-    node_tf = Node(
-        name       = 'tf', 
-        package    = 'pixar',
-        executable = 'broadcaster',
-        output     = 'screen')
     
     node_trajectory = Node(
         name       = 'trajectory', 

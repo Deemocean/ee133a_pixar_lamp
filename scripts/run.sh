@@ -6,4 +6,4 @@ echo "------------------------[Building]------------------------"
 colcon build
 
 echo "------------------------[Launching]------------------------"
-ros2 launch pixar pixar.launch.py
+ros2 launch pixar pixar_m.launch.py
