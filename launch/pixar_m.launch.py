@@ -38,6 +38,7 @@ def generate_launch_description():
     # Load the robot's URDF file (XML).
     with open(lamp_urdf, 'r') as file:
         lamp_description = file.read()
+        print(lamp_description)
 
     with open(scene_urdf, 'r') as file:
         scene_description = file.read()
@@ -51,13 +52,6 @@ def generate_launch_description():
     #     package    = 'pixar',
     #     executable = 'broadcaster',
     #     output     = 'screen')
-    
-    node_trajectory = Node(
-        name       = 'trajectory', 
-        package    = 'pixar',
-        executable = 'momentum',
-        output     = 'screen')
-
 
     # Configure a node for the robot_state_publisher.
     node_robot_state_publisher_lamp = Node(
@@ -66,8 +60,7 @@ def generate_launch_description():
         package    = 'robot_state_publisher',
         executable = 'robot_state_publisher',
         output     = 'screen',
-        parameters = [{'robot_description': lamp_description},
-                      {'publish_frequency': 60.0}])
+        parameters = [{'robot_description': lamp_description}])
     
     node_robot_state_publisher_scene = Node(
         name       = 'robot_state_publisher', 
@@ -76,7 +69,6 @@ def generate_launch_description():
         executable = 'robot_state_publisher',
         output     = 'screen',
         parameters = [{'robot_description': scene_description}])
-    
     # Configure a node for RVIZ
     node_rviz = Node(
         name       = 'rviz', 
@@ -85,14 +77,27 @@ def generate_launch_description():
         output     = 'screen',
         arguments  = ['-d', rvizcfg],
         on_exit    = Shutdown())
+    
+    node_marker = Node(
+        name       = 'marker', 
+        package    = 'pixar',
+        executable = 'marker',
+        output     = 'screen')
+
+    node_trajectory = Node(
+        name       = 'trajectory', 
+        package    = 'pixar',
+        executable = 'momentum',
+        output     = 'screen')
 
 
     ######################################################################
     # RETURN THE ELEMENTS IN ONE LIST
     return LaunchDescription([
         # Start the robot_state_publisher, RVIZ, and the trajectory.
-        node_trajectory,
         node_robot_state_publisher_lamp,
         node_robot_state_publisher_scene,
         node_rviz,
+        node_trajectory,
+        node_marker,
     ])

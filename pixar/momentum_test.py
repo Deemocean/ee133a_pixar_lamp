@@ -2,6 +2,7 @@
 
 import rclpy
 import numpy as np
+from std_msgs.msg import Float64
 
 from math import pi, sin, cos, acos, atan2, sqrt, fmod, exp
 
@@ -39,7 +40,7 @@ m5 = 0.1
 #
 #   Trajectory Class
 #
-class Trajectory2():
+class Trajectory():
     # Initialization.
     def __init__(self, node):
         # Initialize the current joint position to the starting
@@ -54,6 +55,8 @@ class Trajectory2():
 
         # Pick the convergence bandwidth.
         self.lam = 20
+
+        self.pub = node.create_publisher(Float64, '/com', 10)
 
     # Declare the joint names.
     def jointnames(self):
@@ -159,6 +162,8 @@ class Trajectory2():
         wd = pzero()
         self.qd = qd
         self.Rd = Rd
+
+        self.pub.publish(Float64(data=xr))
         
         # Return the desired joint and task (orientation) pos/vel.
         return (qd, qddot, xd, vd, Rd, wd, None, None)
@@ -172,14 +177,14 @@ def main(args=None):
 
     # Initialize the generator node for 100Hz udpates, using the above
     # Trajectory class.
-    generator2 = GeneratorNode('generator2', 100, Trajectory2)
+    generator = GeneratorNode('generator', "/lamp", 100, Trajectory)
 
     # Spin, meaning keep running (taking care of the timer callbacks
     # and message passing), until interrupted or the trajectory ends.
-    generator2.spin()
+    generator.spin()
 
     # Shutdown the node and ROS.
-    generator2.shutdown()
+    generator.shutdown()
     rclpy.shutdown()
 
 if __name__ == "__main__":

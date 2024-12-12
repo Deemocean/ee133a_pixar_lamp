@@ -46,7 +46,7 @@ from math import nan
 
 from asyncio            import Future
 from rclpy.node         import Node
-from geometry_msgs.msg  import PoseStamped, TwistStamped
+from geometry_msgs.msg  import PoseStamped, TwistStamped, PointStamped
 from geometry_msgs.msg  import TransformStamped
 from sensor_msgs.msg    import JointState
 
@@ -166,7 +166,6 @@ class GeneratorNode(Node):
         if type(p).__module__    == np.__name__: p    = p.flatten().tolist()
         if type(v).__module__    == np.__name__: v    = v.flatten().tolist()
         if type(w).__module__    == np.__name__: w    = w.flatten().tolist()
-
 
         # Verify the sizes.
         if not (len(q) == len(self.jointnames) and
