@@ -23,8 +23,7 @@ RADIUS = 0.25
 m1 = 0.1
 m2 = 0.1
 m3 = 0.1
-m4 = 0.1
-m5 = 0.1
+m4 = 0.2
 
 #
 #   Lamp Kinematics
@@ -51,13 +50,17 @@ class Trajectory():
         self.chain2 = KinematicChain(node, 'base', 'link2', self.jointnames()[0:3])
         self.chain3 = KinematicChain(node, 'base', 'head', self.jointnames()) # note that j4 and 5 both act on the head
         # we need each frame for the jacobian calculation above
-        self.qd = [0.,0.,0.,0.,0.]
+        self.qd = [0.,pi/4, -pi/2,0.,0.]
         self.Rd = Reye()
+        self.wd = pzero()
+        self.qddot = [0.0, 0.0, 0.0, 0.0, 0.0]
 
         # Pick the convergence bandwidth.
-        self.lam = 20
+        self.lam = 10
 
-        self.pub = node.create_publisher(Point, '/com', 10)
+        self.gam = 0.1
+
+        self.pub = node.create_publisher(Point, '/com', 100)
 
     # Declare the joint names.
     def jointnames(self):
@@ -87,29 +90,29 @@ class Trajectory():
         # Transformation Matrix is 4x4
         # If you are transfoming a point(instead of a frame), the R part is not needed
 
-        # F0 = T_from_Rp(R0, pos0)
-        # F1 = T_from_Rp(R1, pos1)
-        # F2 = T_from_Rp(R2, pos2)
-        # F3 = T_from_Rp(R3, pos3)
+        F0 = T_from_Rp(R0, pos0)
+        F1 = T_from_Rp(R1, pos1)
+        F2 = T_from_Rp(R2, pos2)
+        F3 = T_from_Rp(R3, pos3)
 
-        # c1 = F0 @ pxyz(0, 0, LENGTH/2)
-        # c2 = F1 @ pxyz(LENGTH, 0, 0)
-        # c3 = F2 @ pxyz(LENGTH/2, 0, 0)
-        # c4 = F3 @ pxyz(RADIUS/2, 0, 0)
-        c1 = pos0 + pxyz(0, 0, LENGTH/2)
-        c2 = pos1 + pxyz(LENGTH, 0, 0)
-        c3 = pos2 + pxyz(LENGTH/2, 0, 0)
-        c4 = pos3 + pxyz(RADIUS/2, 0, 0)
+        c1 = (F0 @ phom(0., 0., LENGTH/2))[0:3]
+        c2 = (F1 @ phom(0., 0., LENGTH/2))[0:3]
+        c3 = (F2 @ phom(0., 0., LENGTH/2))[0:3]
+        c4 = (F3 @ phom(0., 0., LENGTH/2))[0:3]
+        # c1 = pos0 + pxyz(0.0, 0.0, LENGTH/2)
+        # c2 = pos1 + pxyz(LENGTH, 0.0, 0.0)
+        # c3 = pos2 + pxyz(LENGTH/2, 0.0, 0.0)
+        # c4 = pos3 + pxyz(RADIUS/2, 0.0, 0.0)
 
         # # we also need to find where each joint is
-        # p1 = pzero()
-        # p2 = F0 @ pxyz(LENGTH, 0, 0)
-        # p3 = F1 @ pxyz(LENGTH, 0, 0)
-        # p4 = F2 @ pxyz(LENGTH, 0, 0)
         p1 = pzero()
-        p2 = pos0+ pxyz(LENGTH, 0, 0)
-        p3 = pos1+ pxyz(LENGTH, 0, 0)
-        p4 = pos2+ pxyz(LENGTH, 0, 0)
+        p2 = (F0 @ phom(0.0, 0.0, LENGTH))[0:3]
+        p3 = (F1 @ phom(0.0, 0.0, LENGTH))[0:3]
+        p4 = (F2 @ phom(0.0, 0.0, LENGTH))[0:3]
+        # p1 = pzero()
+        # p2 = pos0+ pxyz(LENGTH, 0.0, 0.0)
+        # p3 = pos1+ pxyz(LENGTH, 0.0, 0.0)
+        # p4 = pos2+ pxyz(LENGTH, 0.0, 0.0)
         # note that the fifth joint is connected directly to the fourth link
 
         # calculate the jacobian for each link's center of mass
@@ -143,100 +146,223 @@ class Trajectory():
 
         # Each J is 3x5, representing only the linear part
 
-        J1 = np.zeros((3, 5))
-        J1[:, 0] = cross(nz(), c1 - p1)
+        J1 = np.zeros((6, 5))
+        J1[:, 0] = np.hstack((cross(nz(), c1 - p1), nz()))
 
-        J2 = np.zeros((3, 5))
-        J2[:, 0] = cross(nz(), c2 - p1)
-        J2[:, 1] = cross(ny(), c2 - p2)
+        J2 = np.zeros((6, 5))
+        J2[:, 0] = np.hstack((cross(nz(), c2 - p1), nz()))
+        J2[:, 1] = np.hstack((cross(ny(), c2 - p2), ny()))
 
-        J3 = np.zeros((3, 5))
-        J3[:, 0] = cross(nz(), c3 - p1)
-        J3[:, 1] = cross(ny(), c3 - p2)
-        J3[:, 2] = cross(ny(), c3 - p3)
+        J3 = np.zeros((6, 5))
+        J3[:, 0] = np.hstack((cross(nz(), c3 - p1), nz()))
+        J3[:, 1] = np.hstack((cross(ny(), c3 - p2), ny()))
+        J3[:, 2] = np.hstack((cross(ny(), c3 - p3), ny()))
 
-        J4 = np.zeros((3, 5))
-        J4[:, 0] = cross(nz(), c4 - p1)
-        J4[:, 1] = cross(ny(), c4 - p2)
-        J4[:, 2] = cross(ny(), c4 - p3)
-        J4[:, 3] = cross(ny(), c4 - p4)
+        # J4 = np.zeros((3, 5))
+        # J4[:, 0] = cross(nz(), c4 - p1)
+        # J4[:, 1] = cross(ny(), c4 - p2)
+        # J4[:, 2] = cross(ny(), c4 - p3)
+        # J4[:, 3] = cross(ny(), c4 - p4)
 
         # c4 and p4 are reused for J5 as per the note
-        J5 = np.zeros((3, 5))
-        J5[:, 0] = cross(nz(), c4 - p1)
-        J5[:, 1] = cross(ny(), c4 - p2)
-        J5[:, 2] = cross(ny(), c4 - p3)
-        J5[:, 3] = cross(ny(), c4 - p4)
-        J5[:, 4] = cross(nx(), c4 - p4)
+        J4 = np.zeros((6, 5))
+        J4[:, 0] = np.hstack((cross(nz(), c4 - p1), nz()))
+        J4[:, 1] = np.hstack((cross(ny(), c4 - p2), ny()))
+        J4[:, 2] = np.hstack((cross(ny(), c4 - p3), ny()))
+        J4[:, 3] = np.hstack((cross(ny(), c4 - p4), ny()))
+        J4[:, 4] = np.hstack((cross(nx(), c4 - p4), nx()))
     
         # now find the total COM jacobian by summing and dividing by the mass
-        J = (m1*J1 + m2*J2 + m3*J3 + m4*J4 + m5*J5)/(m1+m2+m3+m4+m5)
+        J = (m1*J1 + m2*J2 + m3*J3 + m4*J4)/(m1+m2+m3+m4)
 
         #return J, J1, J2, J3, J4, J5
         return J
 
     # Evaluate at the given time.  This was last called (dt) ago.
     def evaluate(self, t, dt):
+        tt = t % 5
         # we're just going to make the center of mass go up and down
-        xd = np.array([1, 0, 4+np.cos(t)])
-        vd = np.array([0, 0, -np.sin(t)])
-        
-        # Grab the last joint value and desired orientation.
-        qdlast = self.qd
+        if tt<1.0:
+            qd = self.qd
+            qddot = self.qddot
+            p_base_in_world = [0.0, 0.0, 0.0]
+            q_base_in_world = quat_from_R(Reye())
+            xd = np.array([0.0, 0.0, 0.0])
+            vd = np.array([0.0, 0.0, 0.0])
+            return (qd, qddot, xd, vd, self.Rd, self.wd, p_base_in_world,q_base_in_world)
+        elif tt < 2.0:
+            xd, vd = goto(tt-1.0, 1.0, np.array([0.07071, 0.0, 0.9]), np.array([0.0, 0.0, 1.0]))
+            # xd, vd = spline(t - 5.0, 1.0, np.array([0.07071, 0.0, 0.9]), np.array([0.0, 0.0, 1.15]), 0.0, 4.0)
+            # xd = np.array([0.0, 0.0, 0.5+0.25*sin(t)])
+            # vd = np.array([0.0, 0.0, 0.25*cos(t)])
+            
+            # Grab the last joint value and desired orientation.
+            qdlast = self.qd
 
-        # Compute the inverse kinematics
-        # first we need to use the fkin to find the location of each COM
+            # Compute the inverse kinematics
+            # first we need to use the fkin to find the location of each COM
 
-        pos0, R0, _, _ = self.chain0.fkin(qdlast[0:1])
-        pos1, R1 , _, _ = self.chain1.fkin(qdlast[0:2])
-        pos2, R2, _, _ = self.chain2.fkin(qdlast[0:3])
-        pos3, R3, _, _ = self.chain3.fkin(qdlast[0:5])
+            pos0, R0, _, _ = self.chain0.fkin(qdlast[0:1])
+            pos1, R1, _, _ = self.chain1.fkin(qdlast[0:2])
+            pos2, R2, _, _ = self.chain2.fkin(qdlast[0:3])
+            pos3, R3, _, _ = self.chain3.fkin(qdlast[0:5])
 
-        # F0 = T_from_Rp(R0, pos0)
-        # F1 = T_from_Rp(R1, pos1)
-        # F2 = T_from_Rp(R2, pos2)
-        # F3 = T_from_Rp(R3, pos3)
+            F0 = T_from_Rp(R0, pos0)
+            F1 = T_from_Rp(R1, pos1)
+            F2 = T_from_Rp(R2, pos2)
+            F3 = T_from_Rp(R3, pos3)
 
-        # xr1 = F0 @ pxyz(0, 0, LENGTH/2)
-        # xr2 = F1 @ pxyz(LENGTH, 0, 0)
-        # xr3 = F2 @ pxyz(LENGTH/2, 0, 0)
-        # xr4 = F3 @ pxyz(RADIUS/2, 0, 0)
+            # print("Matrices", F0)
+            # print("Sizes", F0.shape, phom(0.0, 0.0, LENGTH/2).shape)
+            xr1 = (F0 @ phom(0.0, 0.0, LENGTH/2))[0:3]
+            xr2 = (F1 @ phom(0.0, 0.0, LENGTH/2))[0:3]
+            xr3 = (F2 @ phom(0.0, 0.0, LENGTH/2))[0:3]
+            xr4 = (F3 @ phom(0.0, 0.0, RADIUS/2))[0:3]
 
-        xr1 = pos0 +  pxyz(0, 0, LENGTH/2)
-        xr2 = pos1 + pxyz(LENGTH, 0, 0)
-        xr3 = pos2 +  pxyz(LENGTH/2, 0, 0)
-        xr4 = pos3 +  pxyz(RADIUS/2, 0, 0)
+            # xr1 = pos0 +  pxyz(0.0, 0.0, LENGTH/2)
+            # xr2 = pos1 + pxyz(LENGTH, 0.0, 0.0)
+            # xr3 = pos2 +  pxyz(LENGTH/2, 0.0, 0.0)
+            # xr4 = pos3 +  pxyz(RADIUS/2, 0.0, 0.0)
 
-        # the position of the robot's center of mass is used as the reference
-        xr = (xr1 + xr2 + xr3 + xr4) / (m1 + m2 + m3 + m4)
+            # the position of the robot's center of mass is used as the reference
+            xr = (m1*xr1 + m2*xr2 + m3*xr3 + m4*xr4) / (m1 + m2 + m3 + m4)
+            Rr = Rotz(atan2(xr[1], xr[0])) # define the orientation of the COM radially from the center of the robot
 
-        # 5x3 @ 3x1 = 5x1  
-        qddot = np.linalg.pinv(self.Jac(qdlast)) @ (vd + self.lam*ep(xd, xr)) 
+            # calculate the position and orientation error
+            # position error
+            error_pos = ep(xd, xr)
+            
+            # orientation error
+            error_rot = eR(self.Rd, Rr)
 
-        # print("self.Jac(qdlast) = ", self.Jac(qdlast).shape)
-        # print("pinv = ", np.linalg.pinv(self.Jac(qdlast)).shape)
+            # stack everything
+            error = np.concatenate((error_pos, error_rot))
+            xddot = np.concatenate((vd, self.qddot[0]*nz()))
 
-        # Integrate the joint position.
-        qd = qdlast + dt * qddot
+            # 5x3 @ 3x1 = 5x1 
+            # we're going to use a weighted jacobian inverse to protect against singularities
+            # because it is difficult to consider the COM in this context
+            J = self.Jac(qdlast)
+            # J_inv = np.linalg.pinv(J.T @ J + (self.gam**2)*np.eye(5)) @ J.T
+            qddot = np.linalg.pinv(J) @ (xddot + self.lam*error)
 
-        # Save the joint value and desired orientation for next cycle.
-        Rd = Reye()
-        wd = pzero()
-        self.qd = qd
-        self.Rd = Rd
+            # print("self.Jac(qdlast) = ", self.Jac(qdlast).shape)
+            # print("pinv = ", np.linalg.pinv(self.Jac(qdlast)).shape)
 
-        # Publish the point xr
+            # Integrate the joint position.
+            qd = qdlast + dt * qddot
 
-        self.pub.publish(Point_from_p(xr))
+            # Save the joint value and desired orientation for next cycle.
+            self.qddot = qddot
+            self.wd = self.qd[0]*nz()
+            self.qd = qd
+            self.Rd = Rotz(atan2(xd[1], xd[0]))
 
-        p_base_in_world = [0.0,0.0,0.0]
-        q_base_in_world = quat_from_R(Reye())
+            # Publish the point xr
 
-        print("qd   = ", qd.shape)
-        print("qdot = ", qddot.shape)
-        
-        # Return the desired joint and task (orientation) pos/vel.
-        return (qd, qddot, xd, vd, Rd, wd, p_base_in_world,q_base_in_world)
+            self.pub.publish(Point_from_p(xr))
+
+            p_base_in_world = [0.0,0.0,0.0]
+            q_base_in_world = quat_from_R(Reye())
+
+            # print("qd   = ", qd.shape)
+            # print("qdot = ", qddot.shape)
+            
+            # Return the desired joint and task (orientation) pos/vel.
+            return (qd, qddot, xd, vd, self.Rd, self.wd, p_base_in_world,q_base_in_world)
+        elif tt < 2.816:
+            t2 = tt - 2.0
+            p_base_in_world = [0.0, 0.0, 4.0 * t2 - 0.5 * 9.8 * t2**2]
+            q_base_in_world = quat_from_R(Reye())
+            xd = np.array([0.0, 0.0, 0.0])
+            vd = np.array([0.0, 0.0, 0.0])
+            return (self.qd, self.qddot, xd, vd, self.Rd, self.wd, p_base_in_world,q_base_in_world)
+        elif tt < 4.0:
+            xd, vd = goto(tt-2.816, 1.184, np.array([0.0, 0.0, 1.0]), np.array([0.07071, 0.0, 0.9]))
+            # xd, vd = spline(t - 5.0, 1.0, np.array([0.07071, 0.0, 0.9]), np.array([0.0, 0.0, 1.15]), 0.0, 4.0)
+            # xd = np.array([0.0, 0.0, 0.5+0.25*sin(t)])
+            # vd = np.array([0.0, 0.0, 0.25*cos(t)])
+            
+            # Grab the last joint value and desired orientation.
+            qdlast = self.qd
+
+            # Compute the inverse kinematics
+            # first we need to use the fkin to find the location of each COM
+
+            pos0, R0, _, _ = self.chain0.fkin(qdlast[0:1])
+            pos1, R1, _, _ = self.chain1.fkin(qdlast[0:2])
+            pos2, R2, _, _ = self.chain2.fkin(qdlast[0:3])
+            pos3, R3, _, _ = self.chain3.fkin(qdlast[0:5])
+
+            F0 = T_from_Rp(R0, pos0)
+            F1 = T_from_Rp(R1, pos1)
+            F2 = T_from_Rp(R2, pos2)
+            F3 = T_from_Rp(R3, pos3)
+
+            # print("Matrices", F0)
+            # print("Sizes", F0.shape, phom(0.0, 0.0, LENGTH/2).shape)
+            xr1 = (F0 @ phom(0.0, 0.0, LENGTH/2))[0:3]
+            xr2 = (F1 @ phom(0.0, 0.0, LENGTH/2))[0:3]
+            xr3 = (F2 @ phom(0.0, 0.0, LENGTH/2))[0:3]
+            xr4 = (F3 @ phom(0.0, 0.0, RADIUS/2))[0:3]
+
+            # xr1 = pos0 +  pxyz(0.0, 0.0, LENGTH/2)
+            # xr2 = pos1 + pxyz(LENGTH, 0.0, 0.0)
+            # xr3 = pos2 +  pxyz(LENGTH/2, 0.0, 0.0)
+            # xr4 = pos3 +  pxyz(RADIUS/2, 0.0, 0.0)
+
+            # the position of the robot's center of mass is used as the reference
+            xr = (m1*xr1 + m2*xr2 + m3*xr3 + m4*xr4) / (m1 + m2 + m3 + m4)
+            Rr = Rotz(atan2(xr[1], xr[0])) # define the orientation of the COM radially from the center of the robot
+
+            # calculate the position and orientation error
+            # position error
+            error_pos = ep(xd, xr)
+            
+            # orientation error
+            error_rot = eR(self.Rd, Rr)
+
+            # stack everything
+            error = np.concatenate((error_pos, error_rot))
+            xddot = np.concatenate((vd, self.qddot[0]*nz()))
+
+            # 5x3 @ 3x1 = 5x1 
+            # we're going to use a weighted jacobian inverse to protect against singularities
+            # because it is difficult to consider the COM in this context
+            J = self.Jac(qdlast)
+            # J_inv = np.linalg.pinv(J.T @ J + (self.gam**2)*np.eye(5)) @ J.T
+            qddot = np.linalg.pinv(J) @ (xddot + self.lam*error)
+
+            # print("self.Jac(qdlast) = ", self.Jac(qdlast).shape)
+            # print("pinv = ", np.linalg.pinv(self.Jac(qdlast)).shape)
+
+            # Integrate the joint position.
+            qd = qdlast + dt * qddot
+
+            # Save the joint value and desired orientation for next cycle.
+            self.qddot = qddot
+            self.wd = self.qd[0]*nz()
+            self.qd = qd
+            self.Rd = Rotz(atan2(xd[1], xd[0]))
+
+            # Publish the point xr
+
+            self.pub.publish(Point_from_p(xr))
+
+            p_base_in_world = [0.0,0.0,0.0]
+            q_base_in_world = quat_from_R(Reye())
+
+            # print("qd   = ", qd.shape)
+            # print("qdot = ", qddot.shape)
+            
+            # Return the desired joint and task (orientation) pos/vel.
+            return (qd, qddot, xd, vd, self.Rd, self.wd, p_base_in_world,q_base_in_world)
+        else:
+            p_base_in_world = [0.0, 0.0, 0.0]
+            q_base_in_world = quat_from_R(Reye())
+            xd = np.array([0.0, 0.0, 0.0])
+            vd = np.array([0.0, 0.0, 0.0])
+            return (self.qd, self.qddot, xd, vd, self.Rd, self.wd, p_base_in_world,q_base_in_world)
     
 #
 #  Main Code

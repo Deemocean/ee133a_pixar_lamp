@@ -118,6 +118,8 @@ def pzero():
 def pxyz(x,y,z):
     return np.array([x,y,z])
 
+def phom(x,y,z):
+    return np.array([x,y,z,1])
 
 #
 #   Axis (Unit 3-Vector)

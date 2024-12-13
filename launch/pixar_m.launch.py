@@ -60,7 +60,8 @@ def generate_launch_description():
         package    = 'robot_state_publisher',
         executable = 'robot_state_publisher',
         output     = 'screen',
-        parameters = [{'robot_description': lamp_description}])
+        parameters = [{'robot_description': lamp_description},
+                      {'publish_frequency': 100.0}])
     
     node_robot_state_publisher_scene = Node(
         name       = 'robot_state_publisher', 
