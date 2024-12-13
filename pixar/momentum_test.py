@@ -60,6 +60,10 @@ class Trajectory():
 
         self.gam = 0.1
 
+        # this will remember the position of the base while it jumps in a line
+        self.base = pzero()
+        self.base_final = pzero()
+
         self.pub = node.create_publisher(Point, '/com', 100)
 
     # Declare the joint names.
@@ -180,18 +184,20 @@ class Trajectory():
 
     # Evaluate at the given time.  This was last called (dt) ago.
     def evaluate(self, t, dt):
+        if t >= 20:
+            return None
         tt = t % 5
         # we're just going to make the center of mass go up and down
         if tt<1.0:
             qd = self.qd
             qddot = self.qddot
-            p_base_in_world = [0.0, 0.0, 0.0]
+            p_base_in_world = self.base
             q_base_in_world = quat_from_R(Reye())
             xd = np.array([0.0, 0.0, 0.0])
             vd = np.array([0.0, 0.0, 0.0])
             return (qd, qddot, xd, vd, self.Rd, self.wd, p_base_in_world,q_base_in_world)
         elif tt < 2.0:
-            xd, vd = goto(tt-1.0, 1.0, np.array([0.07071, 0.0, 0.9]), np.array([0.0, 0.0, 1.0]))
+            xd, vd = goto(tt-1.0, 1.0, np.array([0.07071, 0.0, 0.9]), np.array([-0.25, 0.0, 1.0]))
             # xd, vd = spline(t - 5.0, 1.0, np.array([0.07071, 0.0, 0.9]), np.array([0.0, 0.0, 1.15]), 0.0, 4.0)
             # xd = np.array([0.0, 0.0, 0.5+0.25*sin(t)])
             # vd = np.array([0.0, 0.0, 0.25*cos(t)])
@@ -262,7 +268,7 @@ class Trajectory():
 
             self.pub.publish(Point_from_p(xr))
 
-            p_base_in_world = [0.0,0.0,0.0]
+            p_base_in_world = self.base
             q_base_in_world = quat_from_R(Reye())
 
             # print("qd   = ", qd.shape)
@@ -272,12 +278,14 @@ class Trajectory():
             return (qd, qddot, xd, vd, self.Rd, self.wd, p_base_in_world,q_base_in_world)
         elif tt < 2.816:
             t2 = tt - 2.0
-            p_base_in_world = [0.0, 0.0, 4.0 * t2 - 0.5 * 9.8 * t2**2]
+            p_base_in_world = [self.base[0]-t2, 0.0, 4.0 * t2 - 0.5 * 9.8 * t2**2]
             q_base_in_world = quat_from_R(Reye())
             xd = np.array([0.0, 0.0, 0.0])
             vd = np.array([0.0, 0.0, 0.0])
+            self.base_final = p_base_in_world
             return (self.qd, self.qddot, xd, vd, self.Rd, self.wd, p_base_in_world,q_base_in_world)
         elif tt < 4.0:
+            self.base = self.base_final
             xd, vd = goto(tt-2.816, 1.184, np.array([0.0, 0.0, 1.0]), np.array([0.07071, 0.0, 0.9]))
             # xd, vd = spline(t - 5.0, 1.0, np.array([0.07071, 0.0, 0.9]), np.array([0.0, 0.0, 1.15]), 0.0, 4.0)
             # xd = np.array([0.0, 0.0, 0.5+0.25*sin(t)])
@@ -349,7 +357,7 @@ class Trajectory():
 
             self.pub.publish(Point_from_p(xr))
 
-            p_base_in_world = [0.0,0.0,0.0]
+            p_base_in_world = self.base
             q_base_in_world = quat_from_R(Reye())
 
             # print("qd   = ", qd.shape)
@@ -358,7 +366,7 @@ class Trajectory():
             # Return the desired joint and task (orientation) pos/vel.
             return (qd, qddot, xd, vd, self.Rd, self.wd, p_base_in_world,q_base_in_world)
         else:
-            p_base_in_world = [0.0, 0.0, 0.0]
+            p_base_in_world = self.base
             q_base_in_world = quat_from_R(Reye())
             xd = np.array([0.0, 0.0, 0.0])
             vd = np.array([0.0, 0.0, 0.0])
