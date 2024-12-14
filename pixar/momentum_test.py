@@ -57,12 +57,12 @@ class Trajectory():
 
         # Pick the convergence bandwidth.
         self.lam = 10
-
         self.gam = 0.5
 
         # this will remember the position of the base while it jumps in a line
-        self.base = pzero()
-        self.base_final = pzero()
+        self.p_first_E = pxyz(0.5,1,1)
+        self.base = self.p_first_E 
+        self.base_final = self.p_first_E 
 
         self.pub = node.create_publisher(Point, '/com', 100)
 
@@ -194,7 +194,7 @@ class Trajectory():
             qd = self.qd
             qddot = self.qddot
             p_base_in_world = self.base
-            q_base_in_world = quat_from_R(Reye())
+            q_base_in_world = quat_from_R(Rotz(-pi/2))
             xd = np.array([0.0, 0.0, 0.0])
             vd = np.array([0.0, 0.0, 0.0])
             return (qd, qddot, xd, vd, self.Rd, self.wd, p_base_in_world,q_base_in_world)
@@ -272,8 +272,7 @@ class Trajectory():
             self.pose_pub.publish(Point_from_p(pos3))
 
             p_base_in_world = self.base
-            q_base_in_world = quat_from_R(Reye())
-
+            q_base_in_world = quat_from_R(Rotz(-pi/2))
             # print("qd   = ", qd.shape)
             # print("qdot = ", qddot.shape)
             
@@ -281,8 +280,12 @@ class Trajectory():
             return (qd, qddot, xd, vd, self.Rd, self.wd, p_base_in_world,q_base_in_world)
         elif tt < 2.816:
             t2 = tt - 2.0
-            p_base_in_world = [self.base[0]-t2, 0.0, 4.0 * t2 - 0.5 * 9.8 * t2**2]
-            q_base_in_world = quat_from_R(Reye())
+            #p_base_in_world = [self.base[0]-t2, 0.0, 4.0 * t2 - 0.5 * 9.8 * t2**2]
+            #p_base_in_world = [0.0, - 2*(self.base[0]-t2), 4.0 * t2 - 0.5 * 9.8 * t2**2] + self.base
+
+            p_base_in_world = self.base + np.array([0.0, 1.5*t2, 4.0 * t2 - 0.5 * 9.8 * t2**2])
+
+            q_base_in_world = quat_from_R(Rotz(-pi/2))
             xd = np.array([0.0, 0.0, 0.0])
             vd = np.array([0.0, 0.0, 0.0])
             self.base_final = p_base_in_world
@@ -361,7 +364,7 @@ class Trajectory():
             self.pub.publish(Point_from_p(xr))
 
             p_base_in_world = self.base
-            q_base_in_world = quat_from_R(Reye())
+            q_base_in_world = quat_from_R(Rotz(-pi/2))
 
             # print("qd   = ", qd.shape)
             # print("qdot = ", qddot.shape)
@@ -370,7 +373,7 @@ class Trajectory():
             return (qd, qddot, xd, vd, self.Rd, self.wd, p_base_in_world,q_base_in_world)
         else:
             p_base_in_world = self.base
-            q_base_in_world = quat_from_R(Reye())
+            q_base_in_world = quat_from_R(Rotz(-pi/2))
             xd = np.array([0.0, 0.0, 0.0])
             vd = np.array([0.0, 0.0, 0.0])
             return (self.qd, self.qddot, xd, vd, self.Rd, self.wd, p_base_in_world,q_base_in_world)
