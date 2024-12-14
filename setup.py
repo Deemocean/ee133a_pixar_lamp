@@ -30,7 +30,8 @@ setup(
             'lamp_traj = pixar.lamp_traj_node:main',
             'momentum = pixar.momentum_test:main',
             'marker = pixar.marker_node:main',
-            'plotcom = pixar.helpers.plotcom:main'
+            'plotcom = pixar.helpers.plotcom:main',
+            'plotpose = pixar.helpers.plotpose:main'
         ],
     },
 )

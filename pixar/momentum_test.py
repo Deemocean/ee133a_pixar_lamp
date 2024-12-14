@@ -58,13 +58,15 @@ class Trajectory():
         # Pick the convergence bandwidth.
         self.lam = 10
 
-        self.gam = 0.1
+        self.gam = 0.5
 
         # this will remember the position of the base while it jumps in a line
         self.base = pzero()
         self.base_final = pzero()
 
         self.pub = node.create_publisher(Point, '/com', 100)
+
+        self.pose_pub = node.create_publisher(Point, '/pose', 100)
 
     # Declare the joint names.
     def jointnames(self):
@@ -267,6 +269,7 @@ class Trajectory():
             # Publish the point xr
 
             self.pub.publish(Point_from_p(xr))
+            self.pose_pub.publish(Point_from_p(pos3))
 
             p_base_in_world = self.base
             q_base_in_world = quat_from_R(Reye())
@@ -371,7 +374,86 @@ class Trajectory():
             xd = np.array([0.0, 0.0, 0.0])
             vd = np.array([0.0, 0.0, 0.0])
             return (self.qd, self.qddot, xd, vd, self.Rd, self.wd, p_base_in_world,q_base_in_world)
-    
+        
+        # this code is for the rotational test
+        # xd = np.array([0.25*cos(t), 0.25*sin(t), 0.9])
+        # vd = np.array([-0.25*sin(t), 0.25*cos(t), 0.0])
+        
+        # # Grab the last joint value and desired orientation.
+        # qdlast = self.qd
+
+        # # Compute the inverse kinematics
+        # # first we need to use the fkin to find the location of each COM
+
+        # pos0, R0, _, _ = self.chain0.fkin(qdlast[0:1])
+        # pos1, R1, _, _ = self.chain1.fkin(qdlast[0:2])
+        # pos2, R2, _, _ = self.chain2.fkin(qdlast[0:3])
+        # pos3, R3, _, _ = self.chain3.fkin(qdlast[0:5])
+
+        # F0 = T_from_Rp(R0, pos0)
+        # F1 = T_from_Rp(R1, pos1)
+        # F2 = T_from_Rp(R2, pos2)
+        # F3 = T_from_Rp(R3, pos3)
+
+        # # print("Matrices", F0)
+        # # print("Sizes", F0.shape, phom(0.0, 0.0, LENGTH/2).shape)
+        # xr1 = (F0 @ phom(0.0, 0.0, LENGTH/2))[0:3]
+        # xr2 = (F1 @ phom(0.0, 0.0, LENGTH/2))[0:3]
+        # xr3 = (F2 @ phom(0.0, 0.0, LENGTH/2))[0:3]
+        # xr4 = (F3 @ phom(0.0, 0.0, RADIUS/2))[0:3]
+
+        # # xr1 = pos0 +  pxyz(0.0, 0.0, LENGTH/2)
+        # # xr2 = pos1 + pxyz(LENGTH, 0.0, 0.0)
+        # # xr3 = pos2 +  pxyz(LENGTH/2, 0.0, 0.0)
+        # # xr4 = pos3 +  pxyz(RADIUS/2, 0.0, 0.0)
+
+        # # the position of the robot's center of mass is used as the reference
+        # xr = (m1*xr1 + m2*xr2 + m3*xr3 + m4*xr4) / (m1 + m2 + m3 + m4)
+        # Rr = Rotz(atan2(xr[1], xr[0])) # define the orientation of the COM radially from the center of the robot
+
+        # # calculate the position and orientation error
+        # # position error
+        # error_pos = ep(xd, xr)
+        
+        # # orientation error
+        # error_rot = eR(self.Rd, Rr)
+
+        # # stack everything
+        # error = np.concatenate((error_pos, error_rot))
+        # xddot = np.concatenate((vd, self.qddot[0]*nz()))
+
+        # # 5x3 @ 3x1 = 5x1 
+        # # we're going to use a weighted jacobian inverse to protect against singularities
+        # # because it is difficult to consider the COM in this context
+        # J = self.Jac(qdlast)
+        # J_inv = np.linalg.pinv(J.T @ J + (self.gam**2)*np.eye(5)) @ J.T
+        # qddot = J_inv @ (xddot + self.lam*error)
+
+        # # print("self.Jac(qdlast) = ", self.Jac(qdlast).shape)
+        # # print("pinv = ", np.linalg.pinv(self.Jac(qdlast)).shape)
+
+        # # Integrate the joint position.
+        # qd = qdlast + dt * qddot
+
+        # # Save the joint value and desired orientation for next cycle.
+        # self.qddot = qddot
+        # self.wd = self.qd[0]*nz()
+        # self.qd = qd
+        # self.Rd = Rotz(atan2(xd[1], xd[0]))
+
+        # # Publish the point xr
+
+        # self.pub.publish(Point_from_p(xr))
+        # self.pose_pub.publish(Point_from_p(pos3))
+
+        # p_base_in_world = self.base
+        # q_base_in_world = quat_from_R(Reye())
+
+        # # print("qd   = ", qd.shape)
+        # # print("qdot = ", qddot.shape)
+        
+        # # Return the desired joint and task (orientation) pos/vel.
+        # return (qd, qddot, xd, vd, self.Rd, self.wd, p_base_in_world,q_base_in_world)
 #
 #  Main Code
 #
